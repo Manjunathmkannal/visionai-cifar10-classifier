@@ -1,0 +1,653 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionAI | Image Classifier</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0b1020;
+            --panel: #131b30;
+            --border: #26334e;
+            --text: #f3f6ff;
+            --muted: #9ba9c4;
+            --accent: #8b7cff;
+            --cyan: #61d8f5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background:
+                radial-gradient(ellipse at 15% 0%, #24204d 0%, transparent 40%),
+                radial-gradient(ellipse at 90% 70%, #102d43 0%, transparent 35%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            height: 78px;
+            padding: 0 7%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(11,16,32,.65);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            font-size: 23px;
+            background: linear-gradient(135deg, #8b7cff, #54d8ed);
+            box-shadow: 0 5px 25px #8b7cff35;
+        }
+
+        .brand span {
+            color: #9d91ff;
+        }
+
+        .status {
+            color: #a8e9ca;
+            font-size: 12px;
+            font-weight: 600;
+            background: #17372f;
+            border: 1px solid #285a49;
+            padding: 9px 13px;
+            border-radius: 30px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            height: 7px;
+            width: 7px;
+            border-radius: 50%;
+            background: #57e3a1;
+            margin-right: 7px;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: auto;
+            padding: 65px 24px 55px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 42px;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            color: #b6aaff;
+            background: #28234a;
+            border: 1px solid #454077;
+            border-radius: 30px;
+            padding: 8px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 23px;
+        }
+
+        h1 {
+            font-size: clamp(36px, 6vw, 58px);
+            line-height: 1.12;
+            letter-spacing: -2.5px;
+            margin-bottom: 18px;
+        }
+
+        h1 span {
+            background: linear-gradient(100deg, #a79aff, #62dff2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            max-width: 570px;
+            margin: auto;
+            line-height: 1.8;
+            font-size: 15px;
+            color: var(--muted);
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1.05fr .95fr;
+            gap: 22px;
+            align-items: stretch;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #161f35, #10182b);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 20px 70px #00000020;
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            margin-bottom: 9px;
+        }
+
+        .step {
+            width: 37px;
+            height: 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            color: #c3baff;
+            background: #2a2550;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        h2 {
+            font-size: 17px;
+            letter-spacing: -.3px;
+        }
+
+        .description {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.7;
+            margin-bottom: 23px;
+        }
+
+        .dropzone {
+            min-height: 225px;
+            padding: 25px 15px;
+            border: 1.5px dashed #48577b;
+            background: #10182a;
+            border-radius: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+
+        .dropzone:hover,
+        .dropzone.dragover {
+            border-color: var(--accent);
+            background: #1b1b3a;
+        }
+
+        .upload-icon {
+            width: 57px;
+            height: 57px;
+            margin: 0 auto 15px;
+            border-radius: 17px;
+            display: grid;
+            place-items: center;
+            font-size: 26px;
+            background: #28234a;
+        }
+
+        .dropzone strong {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 9px;
+        }
+
+        .dropzone strong span {
+            color: #a89aff;
+        }
+
+        .dropzone p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.8;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .preview {
+            display: none;
+            margin-top: 16px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .preview img {
+            width: 65px;
+            height: 65px;
+            object-fit: cover;
+            border-radius: 10px;
+            background: #080d18;
+        }
+
+        .preview-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .preview-info strong {
+            display: block;
+            font-size: 12px;
+            overflow-wrap: anywhere;
+            margin-bottom: 6px;
+        }
+
+        .preview-info span {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .remove-btn {
+            border: 0;
+            background: transparent;
+            color: #ff9baf;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 16px;
+            border: 0;
+            border-radius: 12px;
+            margin-top: 19px;
+            background: linear-gradient(100deg, #8372f7, #5e9cfb);
+            color: white;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 24px #8372f72b;
+            transition: transform .2s, opacity .2s;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .analyze-btn:disabled {
+            opacity: .65;
+            cursor: wait;
+            transform: none;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 10px;
+            text-align: center;
+            margin-top: 14px;
+        }
+
+        .result-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-image {
+            height: 195px;
+            margin: 13px 0 22px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at center, #242a4c, #10182a 72%);
+            display: grid;
+            place-items: center;
+        }
+
+        .result-image img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #7585a5;
+        }
+
+        .empty-state .big-icon {
+            font-size: 44px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 12px;
+        }
+
+        .result-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #a99dff;
+            letter-spacing: 1.7px;
+            margin-bottom: 10px;
+        }
+
+        .prediction {
+            font-size: 29px;
+            font-weight: 800;
+            letter-spacing: -.8px;
+            overflow-wrap: anywhere;
+            margin-bottom: 12px;
+        }
+
+        .result-note {
+            font-size: 12px;
+            line-height: 1.8;
+            color: var(--muted);
+        }
+
+        .class-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 25px;
+        }
+
+        .class-chip {
+            font-size: 10px;
+            color: #c3cde0;
+            background: #1d2940;
+            border: 1px solid #2b3955;
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
+
+        .class-chip.active {
+            color: #c9c0ff;
+            background: #302958;
+            border-color: #6656a8;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 38px;
+            color: #7887a4;
+            font-size: 11px;
+            line-height: 2;
+        }
+
+        .footer span {
+            color: #b5aaff;
+        }
+
+        @media (max-width: 760px) {
+            .navbar {
+                padding: 0 5%;
+                height: 70px;
+            }
+
+            .brand {
+                font-size: 16px;
+            }
+
+            .status {
+                font-size: 10px;
+                padding: 8px 10px;
+            }
+
+            main {
+                padding: 45px 16px;
+            }
+
+            .hero {
+                margin-bottom: 30px;
+            }
+
+            h1 {
+                letter-spacing: -1.5px;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="brand">
+            <div class="logo">✦</div>
+            Vision<span>AI</span>
+        </div>
+        <div class="status">
+            <span class="status-dot"></span>AI MODEL READY
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="eyebrow">✦ &nbsp; POWERED BY DEEP LEARNING</div>
+            <h1>See the world<br>through <span>AI.</span></h1>
+            <p>
+                Upload an image and let your trained neural network
+                identify what it sees. Fast, simple, intelligent.
+            </p>
+        </section>
+
+        <section class="workspace">
+            <div class="card">
+                <div class="card-heading">
+                    <div class="step">01</div>
+                    <h2>Upload your image</h2>
+                </div>
+                <p class="description">
+                    Choose an image for your AI model to analyze.
+                </p>
+
+                <form method="POST"
+                      enctype="multipart/form-data"
+                      id="uploadForm">
+
+                    <label class="dropzone" id="dropzone" for="fileInput">
+                        <div>
+                            <div class="upload-icon">↥</div>
+                            <strong>Drop your image here or <span>browse</span></strong>
+                            <p>PNG or JPG format<br>Choose a clear image for better results</p>
+                        </div>
+                    </label>
+
+                    <input type="file"
+                           name="image"
+                           id="fileInput"
+                           accept="image/png,image/jpeg"
+                           required>
+
+                    <div class="preview" id="preview">
+                        <img id="previewImg" src="" alt="Selected image preview">
+                        <div class="preview-info">
+                            <strong id="fileName">Image selected</strong>
+                            <span id="fileSize"></span>
+                        </div>
+                        <button type="button" class="remove-btn" id="removeBtn">
+                            Remove
+                        </button>
+                    </div>
+
+                    <button class="analyze-btn" id="analyzeBtn" type="submit">
+                        ✦ &nbsp; Analyze Image
+                    </button>
+
+                    <p class="hint">Your image will be processed by your trained model.</p>
+                </form>
+            </div>
+
+            <div class="card result-card">
+                <div class="card-heading">
+                    <div class="step">02</div>
+                    <h2>Analysis result</h2>
+                </div>
+                <p class="description">
+                    Your model's predicted image category will appear here.
+                </p>
+
+                <div class="result-image">
+                    {% if image_path %}
+                        <img src="{{ image_path }}" alt="Uploaded image">
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="big-icon">⌘</div>
+                            <p>Your image preview will appear here</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if prediction %}
+                    <div class="result-label">PREDICTED CLASS</div>
+                    <div class="prediction">{{ prediction }}</div>
+                    <p class="result-note">
+                        Your image has been analyzed by the CIFAR-10 image
+                        classification model.
+                    </p>
+                {% else %}
+                    <div class="result-label">WAITING FOR INPUT</div>
+                    <div class="prediction">Ready to analyze</div>
+                    <p class="result-note">
+                        Upload an image and click Analyze Image to see
+                        your prediction.
+                    </p>
+                {% endif %}
+
+                <div class="class-list">
+                    <span class="class-chip">✈ Airplane</span>
+                    <span class="class-chip">🚗 Automobile</span>
+                    <span class="class-chip">🐦 Bird</span>
+                    <span class="class-chip">🐱 Cat</span>
+                    <span class="class-chip">🦌 Deer</span>
+                    <span class="class-chip">🐕 Dog</span>
+                    <span class="class-chip">🐸 Frog</span>
+                    <span class="class-chip">🐴 Horse</span>
+                    <span class="class-chip">🚢 Ship</span>
+                    <span class="class-chip">🚚 Truck</span>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>VISION<span>AI</span> &nbsp; · &nbsp; CIFAR-10 IMAGE CLASSIFICATION</p>
+            <p>Built with Python, Flask &amp; TensorFlow</p>
+        </footer>
+    </main>
+
+    <script>
+        const input = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const preview = document.getElementById('preview');
+        const previewImg = document.getElementById('previewImg');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeBtn = document.getElementById('removeBtn');
+        const form = document.getElementById('uploadForm');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+
+        let previewUrl = null;
+
+        function showFile(file) {
+            if (!file) return;
+
+            if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                alert('Please select a JPG or PNG image.');
+                input.value = '';
+                return;
+            }
+
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+            previewUrl = URL.createObjectURL(file);
+            previewImg.src = previewUrl;
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+            preview.style.display = 'flex';
+            dropzone.style.display = 'none';
+        }
+
+        input.addEventListener('change', () => {
+            showFile(input.files[0]);
+        });
+
+        removeBtn.addEventListener('click', () => {
+            input.value = '';
+            preview.style.display = 'none';
+            dropzone.style.display = 'flex';
+
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            previewUrl = null;
+            previewImg.src = '';
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, event => {
+                event.preventDefault();
+                dropzone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, event => {
+                event.preventDefault();
+                dropzone.classList.remove('dragover');
+            });
+        });
+
+        dropzone.addEventListener('drop', event => {
+            const file = event.dataTransfer.files[0];
+            if (!file) return;
+
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            input.files = transfer.files;
+            showFile(file);
+        });
+
+        form.addEventListener('submit', event => {
+            if (!input.files.length) {
+                event.preventDefault();
+                alert('Please select an image first.');
+                return;
+            }
+
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = 'Analyzing image...';
+        });
+    </script>
+</body>
+</html>
+
